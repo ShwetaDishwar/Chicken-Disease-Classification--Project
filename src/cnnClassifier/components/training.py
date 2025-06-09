@@ -3,19 +3,17 @@ import tensorflow as tf
 from pathlib import Path
 from cnnClassifier.entity.config_entity import TrainingConfig
 
-
 class Training:
     def __init__(self, config: TrainingConfig):
         self.config = config
-
-        # ✅ Enable eager execution and debug mode
-        tf.config.run_functions_eagerly(True)
-        tf.data.experimental.enable_debug_mode()
+        # ❌ Removed eager execution and debug mode — they cause pyfunc errors with ImageDataGenerator
+        # tf.config.run_functions_eagerly(True)
+        # tf.data.experimental.enable_debug_mode()
 
     def get_base_model(self):
         self.model = tf.keras.models.load_model(self.config.updated_base_model_path)
 
-        # ✅ Recompile model to prevent optimizer error
+        # Recompile model to ensure optimizer/metrics are correctly initialized
         self.model.compile(
             optimizer='adam',
             loss='categorical_crossentropy',
@@ -24,7 +22,7 @@ class Training:
 
     def train_valid_generator(self):
         datagenerator_kwargs = dict(
-            rescale=1./255,
+            rescale=1. / 255,
             validation_split=0.20
         )
 
